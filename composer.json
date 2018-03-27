@@ -1,0 +1,33 @@
+{
+  "name": "mijohansen/php-gae-slim",
+  "description": "Utility belt for common tasks in Google App Engine for PHP.",
+  "type": "library",
+  "version": "0.1.1",
+  "minimum-stability": "dev",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Michael Johansen",
+      "email": "michael.johansen@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5",
+    "slim/slim": "^3.9",
+    "tuupola/slim-jwt-auth": "v2.*",
+    "mijohansen/php-gae-util": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "GaeSlim\\": "src"
+    }
+  },
+  "require-dev": {
+    "php": ">=5.5",
+    "phpunit/phpunit": "^7"
+  },
+  "scripts": {
+    "test": "$(gcloud beta emulators datastore env-init); phpunit",
+    "test1": "$(gcloud beta emulators datastore env-init); phpunit tests/UtilTest.php"
+  }
+}
