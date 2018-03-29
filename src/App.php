@@ -24,7 +24,7 @@ class App extends \Slim\App {
 
         /**
          * Setting default Respons header to text/plain
-         */
+*/
         $this->add(function (Request $request, Response $response, $next) {
             $newResponse = $response->withHeader('Content-type', 'text/plain;charset=utf-8');
             return $next($request, $newResponse);
