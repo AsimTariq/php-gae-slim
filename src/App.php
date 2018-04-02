@@ -21,7 +21,14 @@ class App extends \Slim\App {
                 'displayErrorDetails' => Util::isDevServer(),
             ],
         ]);
-
+        /**
+         * Autohandling error reporting.
+         */
+        if (Util::isDevServer()) {
+            error_reporting(E_ALL);
+        } else {
+            error_reporting(0);
+        }
         /**
          * Setting default Respons header to text/plain
          */
@@ -50,5 +57,120 @@ class App extends \Slim\App {
             return $response->withRedirect($to);
         });
     }
+
+    public function jsonErrors() {
+        // add error handler
+        $container = $this->getContainer();
+        $container['notFoundHandler'] = function ($container) {
+            /** @noinspection PhpUnusedParameterInspection */
+            /** @noinspection PhpDocSignatureInspection */
+            return function (Request $request, Response $response) {
+                $payload = [
+                    "error" => [
+                        "code" => 404,
+                        "message" => 'Not Found',
+                        "status" => "NOT_FOUND",
+                        "details" => [],
+                    ]
+                ];
+                return $response
+                    ->withStatus(404)
+                    ->withJson($payload);
+            };
+        };
+        $container['notAllowedHandler'] = function ($container) {
+            /** @noinspection PhpUnusedParameterInspection */
+            /** @noinspection PhpDocSignatureInspection */
+            return function (Request $request, Response $response, array $methods) {
+                $payload = [
+                    "error" => [
+                        "code" => "405",
+                        "message" => 'Method must be one of: ' . implode(', ', $methods),
+                        "status" => "METHOD_NOT_ALLOWED",
+                        "details" => [],
+                    ]
+                ];
+                return $response
+                    ->withStatus(405)
+                    ->withHeader('Allow', implode(', ', $methods))
+                    ->withJson($payload);
+            };
+        };
+        $container['errorHandler'] = function ($container) {
+            /** @noinspection PhpUnusedParameterInspection */
+            /** @noinspection PhpDocSignatureInspection */
+            return function (Request $request, Response $response, \Exception $exception) use ($container) {
+
+                $payload = [
+                    "error" => [
+                        "code" => "500",
+                        "message" => $exception->getMessage(),
+                        "status" => "UNKNOWN",
+                        "details" => [],
+                    ]
+                ];
+                // if debugging enabled add trace to response
+                if ($container['settings']['displayErrorDetails'] === true) {
+                    $payload['trace'] = $exception->getTrace();
+                }
+                return $response
+                    ->withStatus(500)
+                    ->withJson($payload);
+            };
+        };
+        //define an error handler
+
+        $container['phpErrorHandler'] = function ($container) {
+            /** @noinspection PhpUnusedParameterInspection */
+            /** @noinspection PhpDocSignatureInspection */
+            return function (Request $request, Response $response, \Exception $exception) use ($container) {
+                $payload = [
+                    "error" => [
+                        "code" => "500",
+                        "message" => $exception->getMessage(),
+                        "status" => "UNKNOWN",
+                        "details" => [],
+                    ]
+                ];
+                // if debugging enabled add trace to response
+                if ($container['settings']['displayErrorDetails'] === true) {
+                    $payload['trace'] = $exception->getTrace();
+                }
+                return $response
+                    ->withStatus(500)
+                    ->withJson($payload);
+            };
+        };
+
+        register_shutdown_function(function () use ($container) {
+            $errors = array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR);
+            $error = error_get_last();
+            if ($error != null && in_array($error['type'], $errors, true)) {
+                @ob_end_clean();
+                $message = "The system was halted because an error occurred. code: {$error['type']}, message: {$error['message']}";
+                $payload = [
+                    "error" => [
+                        "code" => "500",
+                        "message" => $message,
+                        "status" => "INTERNAL",
+                        "details" => [
+                            "file" => $error['file'],
+                            "line" => $error['line'],
+                        ],
+                    ]
+                ];
+                if ($container['settings']['displayErrorDetails'] === true) {
+                    $payload["error"]["details"]['file'] = $error['file'];
+                    $payload["error"]["details"]['line'] = $error['line'];
+                }
+                http_response_code(500);
+                //header($_SERVER["SERVER_PROTOCOL"] . " 500 Internal Server Error");
+                header("Content-Type: application/json; charset=utf-8'", true);
+                exit(json_encode($payload));
+            }
+        });
+
+    }
+
 }
 
