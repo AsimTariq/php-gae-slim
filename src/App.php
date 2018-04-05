@@ -16,11 +16,18 @@ use Slim\Http\Response;
 class App extends \Slim\App {
 
     public function __construct($container = null) {
-        $container = new Container([
-            'settings' => [
-                'displayErrorDetails' => Util::isDevServer(),
-            ],
-        ]);
+        
+        /**
+         * Allows for overriding.
+         */
+        if(is_null($container)){
+            $container = new Container([
+                'settings' => [
+                    'displayErrorDetails' => Util::isDevServer(),
+                    'debug' => Util::isDevServer()
+                ],
+            ]);
+        }
         /**
          * Autohandling error reporting.
          */
@@ -156,6 +163,7 @@ class App extends \Slim\App {
                         "details" => [
                             "file" => $error['file'],
                             "line" => $error['line'],
+                            "trace"=> debug_backtrace()
                         ],
                     ]
                 ];
