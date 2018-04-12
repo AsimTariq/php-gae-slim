@@ -8,6 +8,8 @@
 
 namespace GaeSlim;
 
+use GaeUtil\Auth;
+use GaeUtil\Conf;
 use GaeUtil\Util;
 use Slim\Container;
 use Slim\Http\Request;
@@ -16,11 +18,11 @@ use Slim\Http\Response;
 class App extends \Slim\App {
 
     public function __construct($container = null) {
-        
+
         /**
          * Allows for overriding.
          */
-        if(is_null($container)){
+        if (is_null($container)) {
             $container = new Container([
                 'settings' => [
                     'displayErrorDetails' => Util::isDevServer(),
@@ -45,6 +47,14 @@ class App extends \Slim\App {
         });
 
         parent::__construct($container);
+    }
+
+    public function addInternalJwtAuth($path) {
+        $this->add(Middleware::JwtAuthInternal($path));
+    }
+
+    public function addScopedJwtAuth($path) {
+        $this->add(Middleware::JwtAuthScoped($path));
     }
 
     public function removeTrailingSlashes() {
@@ -163,7 +173,7 @@ class App extends \Slim\App {
                         "details" => [
                             "file" => $error['file'],
                             "line" => $error['line'],
-                            "trace"=> debug_backtrace()
+                            "trace" => debug_backtrace()
                         ],
                     ]
                 ];
@@ -180,5 +190,27 @@ class App extends \Slim\App {
 
     }
 
+    public function createAuthEndpoint($route, $redirect_after = "/") {
+        Conf::getInstance()->set("auth_callback_url", $route);
+        Conf::getInstance()->set("frontend_url", $redirect_after);
+        $this->get($route, function (Request $request, Response $response) {
+            $auth_code = $request->getQueryParam("code", false);
+            if ($auth_code) {
+                $user_data = Auth::fetchAndSaveTokenByCode($auth_code);
+                if ($user_data) {
+                    $frontend_url = Conf::get("frontend_url");
+                    return $response->withRedirect($frontend_url);
+                } else {
+                    throw new \Exception("Error saving token");
+                }
+            } elseif (isset($get_request["error"])) {
+                throw new \Exception($get_request["error"]);
+            } else {
+                $email = Auth::getCurrentUserEmail();
+                $url = Auth::getAuthRedirectUrl($email);
+                return $response->withRedirect($url);
+            }
+        });
+    }
 }
 
