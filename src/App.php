@@ -39,7 +39,7 @@ class App extends \Slim\App {
             error_reporting(0);
         }
         /**
-         * Setting default Respons header to text/plain
+         * Setting default Response header to text/plain
          */
         $this->add(function (Request $request, Response $response, $next) {
             $newResponse = $response->withHeader('Content-type', 'text/plain;charset=utf-8');
@@ -117,7 +117,6 @@ class App extends \Slim\App {
             /** @noinspection PhpUnusedParameterInspection */
             /** @noinspection PhpDocSignatureInspection */
             return function (Request $request, Response $response, \Exception $exception) use ($container) {
-
                 $payload = [
                     "error" => [
                         "code" => "500",

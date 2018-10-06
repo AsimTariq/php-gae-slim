@@ -1,8 +1,8 @@
 {
   "name": "mijohansen/php-gae-slim",
-  "description": "Utility belt for common tasks in Google App Engine for PHP.",
+  "description": "A few functions to run slim-framework on Google App Engine",
   "type": "library",
-  "version": "0.1.4",
+  "version": "0.2.1",
   "minimum-stability": "dev",
   "prefer-stable": true,
   "license": "Apache-2.0",
