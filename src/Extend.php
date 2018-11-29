@@ -7,10 +7,12 @@
  */
 
 namespace GaeSlim;
+
 use GaeUtil\Util;
 
 class Extend {
-    public static function errorReporting(\Slim\App $app){
+
+    public static function errorReporting(\Slim\App $app) {
         /**
          * Autohandling error reporting.
          */
@@ -20,7 +22,8 @@ class Extend {
             error_reporting(0);
         }
     }
-    public static function jsonErrors(\Slim\App $app){
+
+    public static function jsonErrors(\Slim\App $app) {
 
     }
 }

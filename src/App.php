@@ -10,6 +10,7 @@ namespace GaeSlim;
 
 use GaeUtil\Auth;
 use GaeUtil\Conf;
+use GaeUtil\State;
 use GaeUtil\Util;
 use Slim\Container;
 use Slim\Http\Request;
@@ -24,12 +25,15 @@ class App extends \Slim\App {
          */
         if (is_null($container)) {
             $container = new Container([
-                'settings' => [
-                    'displayErrorDetails' => Util::isDevServer(),
-                    'debug' => Util::isDevServer()
-                ],
+                'settings' => [],
             ]);
         }
+        $settings = $container->get("settings");
+        $settings->replace([
+            'displayErrorDetails' => Util::isDevServer(),
+            'debug' => Util::isDevServer(),
+            'routerCacheFile'=> false,
+        ]);
         /**
          * Autohandling error reporting.
          */
@@ -49,12 +53,26 @@ class App extends \Slim\App {
         parent::__construct($container);
     }
 
+    public function addSetting($key, $val) {
+        $settings = $this->getContainer()->get("settings");
+        $settings->replace([
+            $key => $val
+        ]);
+    }
+
     public function addInternalJwtAuth($path) {
         $this->add(Middleware::JwtAuthInternal($path));
     }
 
     public function addScopedJwtAuth($path) {
         $this->add(Middleware::JwtAuthScoped($path));
+    }
+
+    public function addStatRoute($route,$links=[]){
+        $this->get($route, function (Request $request, Response $response) {
+            $data = State::status($links);
+            return $response->withJson($data);
+        });
     }
 
     public function removeTrailingSlashes() {

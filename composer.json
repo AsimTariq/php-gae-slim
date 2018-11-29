@@ -2,10 +2,9 @@
   "name": "mijohansen/php-gae-slim",
   "description": "A few functions to run slim-framework on Google App Engine",
   "type": "library",
-  "version": "0.2.1",
   "minimum-stability": "dev",
   "prefer-stable": true,
-  "license": "Apache-2.0",
+  "license": "MIT",
   "authors": [
     {
       "name": "Michael Johansen",
@@ -25,8 +24,7 @@
     }
   },
   "require-dev": {
-    "php": ">=5.5",
-    "phpunit/phpunit": "^7"
+    "phpunit/phpunit": "^4.8"
   },
   "scripts": {
     "test": "$(gcloud beta emulators datastore env-init); phpunit",
