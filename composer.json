@@ -1,6 +1,6 @@
 {
   "name": "mijohansen/php-gae-slim",
-  "description": "A few functions to run slim-framework on Google App Engine",
+  "description": "A extra functions to integrate Slim Framework with Google App Engine for php 5.5",
   "type": "library",
   "minimum-stability": "dev",
   "prefer-stable": true,
