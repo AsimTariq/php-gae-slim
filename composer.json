@@ -1,5 +1,5 @@
 {
-  "name": "mijohansen/php-gae-slim",
+  "name": "asimtariq/php-gae-slim",
   "description": "A few functions to run slim-framework on Google App Engine",
   "type": "library",
   "minimum-stability": "dev",
